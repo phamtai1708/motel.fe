@@ -1,9 +1,14 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // <- THÊM
+import { useState } from 'react'; // <- THÊM
+import axios from 'axios'; // <- THÊM
 import logo from "../../Data/MOTEL.png";
 
 const Login = () => {
+  const navigate = useNavigate(); // <- Dùng để chuyển trang
+  const [errorMessage, setErrorMessage] = useState("");
+
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -13,26 +18,48 @@ const Login = () => {
       email: Yup.string().email('Email không hợp lệ').required('Email là bắt buộc'),
       password: Yup.string().required('Mật khẩu là bắt buộc'),
     }),
-    onSubmit: (values) => {
-      console.log(values);
-      // Handle login logic here
+    
+    onSubmit: async (values) => {
+      try {
+        console.log(values)
+        const response = await axios.post("http://localhost:8080/api/v1/users/login", values, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.status === 200) {
+          // Có thể lưu token vào localStorage nếu cần
+          localStorage.setItem('token', response.data.token);
+          navigate("/"); // Chuyển sang trang home
+        }
+      } catch (error) {
+        if (error.response && error.response.data && error.response.data.message) {
+          setErrorMessage(error.response.data.message); // Hiển thị lỗi từ server
+        } else {
+          setErrorMessage("Đăng nhập thất bại. Vui lòng thử lại.");
+        }
+      }
     },
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-50 flex flex-col py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <iframe className="w-full h-full opacity-30" src="https://lottie.host/embed/14c61de3-635b-4ee4-a6e9-e541b6740442/HPqZN6yWiy.lottie"></iframe>
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8 relative z-10">
         <Link to="/" className="flex justify-center">
-          <img src={logo} alt="Logo" className="h-16 w-auto" />
+          <img src={logo} alt="Logo" className="h-16 w-auto hover:opacity-90 transition-opacity" />
         </Link>
       </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-none sm:px-10">
-          <h2 className="mb-8 text-center text-2xl font-bold text-gray-900">Đăng nhập</h2>
-          <form className="space-y-6" onSubmit={formik.handleSubmit}>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border border-gray-100">
+          <h2 className="mb-6 text-center text-3xl font-bold text-gray-900">Đăng nhập</h2>
+          <form className="space-y-5" onSubmit={formik.handleSubmit}>
             <div>
-              <div className="mt-1">
+              <div className="relative">
                 <input
                   id="email"
                   name="email"
@@ -41,17 +68,17 @@ const Login = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.email}
-                  className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                  className="appearance-none block w-full px-4 py-3.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                   placeholder="Email"
                 />
                 {formik.touched.email && formik.errors.email ? (
-                  <div className="text-red-500 text-sm mt-1">{formik.errors.email}</div>
+                  <div className="text-red-500 text-sm mt-1 ml-1">{formik.errors.email}</div>
                 ) : null}
               </div>
             </div>
 
             <div>
-              <div className="mt-1">
+              <div className="relative">
                 <input
                   id="password"
                   name="password"
@@ -60,11 +87,11 @@ const Login = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.password}
-                  className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                  className="appearance-none block w-full px-4 py-3.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                   placeholder="Mật khẩu"
                 />
                 {formik.touched.password && formik.errors.password ? (
-                  <div className="text-red-500 text-sm mt-1">{formik.errors.password}</div>
+                  <div className="text-red-500 text-sm mt-1 ml-1">{formik.errors.password}</div>
                 ) : null}
               </div>
             </div>
@@ -75,7 +102,7 @@ const Login = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded transition-colors"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Ghi nhớ tài khoản
@@ -83,34 +110,37 @@ const Login = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-red-600 hover:text-red-500">
+                <a href="#" className="font-medium text-red-600 hover:text-red-700 transition-colors">
                   Quên mật khẩu?
                 </a>
               </div>
             </div>
 
             <div>
+              <p className="text-red-600 border-none rounded-md p-3 mb-4 text-sm font-medium flex items-center justify-center">
+                {errorMessage}
+              </p>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-sm shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-md shadow-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
               >
                 Đăng nhập
               </button>
             </div>
           </form>
 
-          <div className="mt-6">
+          <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Hoặc</span>
+                <span className="px-4 bg-white text-gray-500">Hoặc đăng nhập với</span>
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-3">
-              <button className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-sm shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            <div className="mt-6 grid grid-cols-1 gap-4">
+              <button className="w-full inline-flex justify-center items-center py-3.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
                 <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#EA4335" d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0545455,0 12,0 C7.27006974,0 3.1977497,2.69829785 1.23999023,6.65002441 L5.26620003,9.76452941 Z"/>
                   <path fill="#34A853" d="M16.0407269,18.0125889 C14.9509167,18.7163016 13.5660892,19.0909091 12,19.0909091 C8.86648613,19.0909091 6.21911939,17.076871 5.27698177,14.2678769 L1.23746264,17.3349879 C3.19279051,21.2936293 7.26500293,24 12,24 C14.9328362,24 17.7353462,22.9573905 19.834192,20.9995801 L16.0407269,18.0125889 Z"/>
@@ -120,7 +150,7 @@ const Login = () => {
                 Đăng nhập với Google
               </button>
 
-              <button className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-sm shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+              <button className="w-full inline-flex justify-center items-center py-3.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
                 <svg className="h-5 w-5 mr-2" fill="#1877F2" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
@@ -129,10 +159,10 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
               Chưa có tài khoản?{' '}
-              <Link to="/register" className="font-medium text-red-600 hover:text-red-500">
+              <Link to="/register" className="font-medium text-red-600 hover:text-red-700 transition-colors">
                 Đăng ký
               </Link>
             </p>
