@@ -21,16 +21,19 @@ const Login = () => {
     
     onSubmit: async (values) => {
       try {
-        console.log(values)
         const response = await axios.post("http://localhost:8080/api/v1/users/login", values, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
         if (response.status === 200) {
-          // Có thể lưu token vào localStorage nếu cần
-          localStorage.setItem('token', response.data.token);
-          navigate("/"); // Chuyển sang trang home
+          // Lưu token và thông tin người dùng vào localStorage
+          localStorage.setItem('token', response.data.accessToken);
+          localStorage.setItem('refreshToken', response.data.refreshToken);
+          localStorage.setItem('user', JSON.stringify(response.data.data));
+          
+          // Chuyển hướng về trang chủ
+          navigate("/");
         }
       } catch (error) {
         if (error.response && error.response.data && error.response.data.message) {

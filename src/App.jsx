@@ -5,6 +5,8 @@ import Register from "./Components/Auth/Register";
 import LandPage from "./Lands/LandPage.jsx"
 import RoomPage from './Rooms/RoomPage.jsx';
 import AboutPage from './AboutUs/AboutUs.jsx';
+import LandInfo from "./Lands/LandInfo.jsx"
+import RoomInfo from "./Rooms/RoomInfo.jsx"
 function App() {
   return (
     <Router>
@@ -13,8 +15,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/lands" element={<LandPage />} />
+        <Route path="/lands/:landId" element={<LandInfo />} />
         <Route path="/rooms" element={<RoomPage />} />
+        <Route path="/rooms/:roomId" element={<RoomInfo />} />
         <Route path="/aboutus" element={<AboutPage />} />
+
       </Routes>
     </Router>
   );

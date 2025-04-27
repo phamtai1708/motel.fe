@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import logo from "../Data/MOTEL.png";
+import UserMenu from './UserMenu';
 
 function MainMenu() {
   const cssMenu =
     "relative inline-block pb-2 text-gray-700 transition duration-300 after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-red-500 hover:after:w-full after:transition-all after:duration-300";
+
+  const isLoggedIn = localStorage.getItem('token');
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
@@ -52,12 +55,18 @@ function MainMenu() {
             </button>
 
             <div className="hidden md:flex items-center gap-4">
-              <Link to="/login" className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium">
-                Đăng nhập
-              </Link>
-              <Link to="/register" className="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg transition-colors text-sm font-medium">
-                Đăng ký
-              </Link>
+              {isLoggedIn ? (
+                <UserMenu />
+              ) : (
+                <>
+                  <Link to="/login" className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium">
+                    Đăng nhập
+                  </Link>
+                  <Link to="/register" className="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg transition-colors text-sm font-medium">
+                    Đăng ký
+                  </Link>
+                </>
+              )}
               <button className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg transition-colors text-sm font-medium">
                 Đăng tin
               </button>
