@@ -2,7 +2,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom'; // <- THÊM
 import { useState } from 'react'; // <- THÊM
-import axios from 'axios'; // <- THÊM
+import { authService } from '../../services/authService';
 import logo from "../../Data/MOTEL.png";
 
 const Login = () => {
@@ -21,23 +21,12 @@ const Login = () => {
     
     onSubmit: async (values) => {
       try {
-        const response = await axios.post("http://localhost:8080/api/v1/users/login", values, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        if (response.status === 200) {
-          // Lưu token và thông tin người dùng vào localStorage
-          localStorage.setItem('token', response.data.accessToken);
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-          localStorage.setItem('user', JSON.stringify(response.data.data));
-          
-          // Chuyển hướng về trang chủ
-          navigate("/");
-        }
+        await authService.login(values);
+        // Chuyển hướng về trang chủ sau khi đăng nhập thành công
+        navigate("/");
       } catch (error) {
-        if (error.response && error.response.data && error.response.data.message) {
-          setErrorMessage(error.response.data.message); // Hiển thị lỗi từ server
+        if (error.response?.data?.message) {
+          setErrorMessage(error.response.data.message);
         } else {
           setErrorMessage("Đăng nhập thất bại. Vui lòng thử lại.");
         }

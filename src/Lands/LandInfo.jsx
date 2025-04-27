@@ -1,10 +1,10 @@
 import MainMenu from "../Components/MainMenu";
 import Footer from "../Components/Footer";
 import Breadcrumb from "../Components/Breadcrumb";
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Card from "../Components/Card";
+import { landService } from "../services/landService";
 // Removed CSS import since we're using Tailwind
 
 function LandInfo() {
@@ -28,17 +28,12 @@ function LandInfo() {
     const fetchLandInfo = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `http://localhost:8080/api/v1/lands/${landId}`
-        );
-        setLandData(response.data.data);
-        const landUserr = await axios.get(
-          `http://localhost:8080/api/v1/users/${response.data.data.userId}`
-        );
-        setLandUserId(landUserr.data.data);
+        const data = await landService.getLandById(landId);
+        setLandData(data);
+        
       } catch (err) {
         setError("Không thể lấy dữ liệu phòng trọ.");
-        console.error(err);
+        console.error("Error fetching land info:", err);
       } finally {
         setLoading(false);
       }

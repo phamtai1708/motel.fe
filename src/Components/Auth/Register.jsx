@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import logo from "../../Data/MOTEL.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import axios from "axios";
+import { authService } from '../../services/authService';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -38,31 +38,15 @@ const Register = () => {
     }),
     onSubmit: async (values) => {
       try {
-        console.log(values);
-        const response = await axios.post(
-          "http://localhost:8080/api/v1/users/register",
-          values,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log(response.status);
-        if (response.status === 200) {
-          setSuccessAlert(true); // Hiện alert
-          setTimeout(() => {
-            setSuccessAlert(false); // Tắt alert sau 2s
-            navigate("/login");
-          }, 5000);
-        }
+        await authService.register(values);
+        setSuccessAlert(true);
+        setTimeout(() => {
+          setSuccessAlert(false);
+          navigate("/login");
+        }, 5000);
       } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.message
-        ) {
-          setErrorMessage("Email hoặc số điện thoại đã được sử dụng"); // Hiển thị lỗi từ servererror.response.data.message
+        if (error.response?.data?.message) {
+          setErrorMessage("Email hoặc số điện thoại đã được sử dụng");
         } else {
           setErrorMessage("Đăng ký thất bại. Vui lòng thử lại.");
         }

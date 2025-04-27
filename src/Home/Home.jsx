@@ -4,6 +4,7 @@ import SlideSearch from "../Components/SlideSearch";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import Card from "../Components/Card.jsx";
+import { landService } from '../services/landService';
 
 function Home() {
   const cssMenu =
@@ -14,13 +15,12 @@ function Home() {
   useEffect(() => {
     const fetchLands = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/api/v1/lands/allLand"
-        );
-        const newData = response.data.data.slice(0, 8);
+        const data = await landService.getAllLands();
+        const newData = data.slice(0, 8);
         setLands(newData);
       } catch (error) {
         console.error("Error fetching lands:", error);
+        // Có thể thêm xử lý lỗi ở đây, ví dụ hiển thị thông báo
       }
     };
 

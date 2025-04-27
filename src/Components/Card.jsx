@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Card({ item, onClick }) {
+  console.log("🚀 ~ Card ~ item:", item)
   const navigate = useNavigate();
+
+  
   const handleClickCard = () => {
-    navigate(`/lands/${item.landId}`, { state: { item } });
+    navigate(`/lands/${item._id}`, { state: { item } });
+    
     if (onClick) {
       onClick(item.images[0]);
     }
