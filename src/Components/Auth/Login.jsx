@@ -1,13 +1,15 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Link, useNavigate } from 'react-router-dom'; // <- THÊM
-import { useState } from 'react'; // <- THÊM
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { authService } from '../../services/authService';
 import logo from "../../Data/MOTEL.png";
 
 const Login = () => {
-  const navigate = useNavigate(); // <- Dùng để chuyển trang
+  const navigate = useNavigate();
+  const location = useLocation();
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const formik = useFormik({
     initialValues: {
@@ -22,14 +24,23 @@ const Login = () => {
     onSubmit: async (values) => {
       try {
         await authService.login(values);
-        // Chuyển hướng về trang chủ sau khi đăng nhập thành công
-        navigate("/");
+        setSuccessMessage("Đăng nhập thành công!");
+        setErrorMessage("");
+        
+        // Lấy URL trang trước đó từ state hoặc mặc định là trang chủ
+        const from = location.state?.from?.pathname || "/";
+        
+        // Sau 2 giây chuyển hướng về trang trước đó
+        setTimeout(() => {
+          navigate(from);
+        }, 2000);
       } catch (error) {
         if (error.response?.data?.message) {
           setErrorMessage(error.response.data.message);
         } else {
           setErrorMessage("Đăng nhập thất bại. Vui lòng thử lại.");
         }
+        setSuccessMessage("");
       }
     },
   });
@@ -109,9 +120,16 @@ const Login = () => {
             </div>
 
             <div>
-              <p className="text-red-600 border-none rounded-md p-3 mb-4 text-sm font-medium flex items-center justify-center">
-                {errorMessage}
-              </p>
+              {errorMessage && (
+                <p className="text-red-600 border-none rounded-md p-3 mb-4 text-sm font-medium flex items-center justify-center">
+                  {errorMessage}
+                </p>
+              )}
+              {successMessage && (
+                <p className="text-green-600 border-none rounded-md p-3 mb-4 text-sm font-medium flex items-center justify-center">
+                  {successMessage}
+                </p>
+              )}
               <button
                 type="submit"
                 className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-md shadow-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"

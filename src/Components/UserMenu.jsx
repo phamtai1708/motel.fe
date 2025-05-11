@@ -21,10 +21,10 @@ function UserMenu() {
           {user?.avatar ? (
             <img src={user.avatar} alt="avatar" className="w-full h-full rounded-full object-cover" />
           ) : (
-            <span className="text-gray-500">{user?.name?.charAt(0) || 'U'}</span>
+            <span className="text-gray-500">{user?.userName?.charAt(0) || 'U'}</span>
           )}
         </div>
-        <span className="text-sm font-medium hidden md:block">{user?.name || 'User'}</span>
+        <span className="text-sm font-medium hidden md:block">{user?.userName || 'User'}</span>
       </button>
 
       {isOpen && (
@@ -36,7 +36,7 @@ function UserMenu() {
             Thông tin tài khoản
           </Link>
           <Link
-            to="/danh-sach-yeu-thich"
+            to="/favorites"
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
             Danh sách yêu thích
