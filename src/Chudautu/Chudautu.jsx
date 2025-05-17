@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { authService } from "../services/authService";
 import { Link, useNavigate } from "react-router-dom";
 import AddLandPopup from "../Components/AddLandPopup";
-import axios from "axios";
+import axios from "../services/axiosConfig";
 import AddRoomPopup from "../Components/AddRoomPopup";
 
 function Chudautu() {
@@ -19,6 +19,14 @@ function Chudautu() {
   const [rooms, setRooms] = useState([]);
   const [selectedLandId, setSelectedLandId] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
+  const [totalLands, setTotalLands] = useState(0);
+  const [totalRooms, setTotalRooms] = useState(0);
+  const [landStats, setLandStats] = useState({
+    totalLands: 0,
+    availableLands: 0,
+    totalPrice: 0,
+    availablePrice: 0
+  });
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -45,19 +53,46 @@ function Chudautu() {
   }, [navigate]);
 
   useEffect(() => {
-    if (activeTab === "lands") {
+    const fetchLands = async () => {
       const user = JSON.parse(localStorage.getItem('user'));
       if (user?.userId) {
-        axios.get(`http://localhost:8080/api/v1/lands/findLandOfUser/${user.userId}`)
-          .then(res => {
-            setLandsList(res.data.data || []);
-          })
-          .catch(err => {
-            setLandsList([]);
+        try {
+          const response = await axios.get(`/lands/findLandOfUser/${user.userId}`);
+          const landsData = response.data.data || [];
+          setLandsList(landsData);
+          setTotalLands(landsData.length);
+          
+          // Tính toán thống kê
+          const stats = landsData.reduce((acc, land) => {
+            const price = Number(land.price) || 0;
+            acc.totalPrice += price;
+            if (land.status === 'Còn trống') {
+              acc.availableLands += 1;
+              acc.availablePrice += price;
+            }
+            return acc;
+          }, {
+            totalLands: landsData.length,
+            availableLands: 0,
+            totalPrice: 0,
+            availablePrice: 0
           });
+          
+          setLandStats(stats);
+        } catch (err) {
+          setLandsList([]);
+          setTotalLands(0);
+          setLandStats({
+            totalLands: 0,
+            availableLands: 0,
+            totalPrice: 0,
+            availablePrice: 0
+          });
+        }
       }
-    }
-  }, [activeTab]);
+    };
+    fetchLands();
+  }, []);
 
   useEffect(() => {
     fetchRooms();
@@ -66,11 +101,14 @@ function Chudautu() {
   const fetchRooms = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
-      const response = await axios.get(`http://localhost:8080/api/v1/rooms/findRoomOfUser/${user.userId}`);
-      setRooms(Array.isArray(response.data) ? response.data : response.data.data || []);
+      const response = await axios.get(`/rooms/findRoomOfUser/${user.userId}`);
+      const roomsData = Array.isArray(response.data) ? response.data : response.data.data || [];
+      setRooms(roomsData);
+      setTotalRooms(roomsData.length);
     } catch (error) {
       console.error('Error fetching rooms:', error);
       setRooms([]);
+      setTotalRooms(0);
     }
   };
 
@@ -135,7 +173,7 @@ function Chudautu() {
               </div>
               <div>
                 <div className="text-gray-500 text-sm">Tổng số nhà trọ</div>
-                <div className="text-2xl font-bold text-blue-500">{userData?.lands?.length || 0}</div>
+                <div className="text-2xl font-bold text-blue-500">{totalLands}</div>
               </div>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow flex items-center border border-gray-100">
@@ -144,7 +182,7 @@ function Chudautu() {
               </div>
               <div>
                 <div className="text-gray-500 text-sm">Tổng số phòng trọ</div>
-                <div className="text-2xl font-bold text-green-500">{userData?.rooms?.length || 0}</div>
+                <div className="text-2xl font-bold text-green-500">{totalRooms}</div>
               </div>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow flex items-center border border-gray-100">
@@ -500,6 +538,39 @@ function Chudautu() {
           <div className="mt-20 ml-64 flex-1 p-8">
             <div className="bg-white p-6 rounded-2xl shadow border border-gray-100">
               {renderTabContent()}
+            </div>
+            
+            {/* Thống kê chi tiết */}
+            <div className="mt-8 bg-white p-6 rounded-2xl shadow border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Thống kê chi tiết nhà trọ</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span className="text-gray-600">Tổng số nhà trọ:</span>
+                    <span className="font-semibold text-blue-600">{landStats.totalLands}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span className="text-gray-600">Số nhà trọ còn trống:</span>
+                    <span className="font-semibold text-green-600">{landStats.availableLands}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span className="text-gray-600">Tổng giá trị nhà trọ:</span>
+                    <span className="font-semibold text-blue-600">{landStats.totalPrice.toLocaleString('vi-VN')} VNĐ</span>
+                  </div>
+                  <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span className="text-gray-600">Tổng giá trị nhà trọ còn trống:</span>
+                    <span className="font-semibold text-green-600">{landStats.availablePrice.toLocaleString('vi-VN')} VNĐ</span>
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="h-64 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-blue-600 mb-2">{Math.round((landStats.availableLands / landStats.totalLands) * 100 || 0)}%</div>
+                      <div className="text-gray-600">Tỷ lệ nhà trọ còn trống</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

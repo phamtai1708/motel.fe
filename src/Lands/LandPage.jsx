@@ -1,6 +1,6 @@
 import MainMenu from "../Components/MainMenu";
 import Footer from "../Components/Footer";
-import axios from "axios";
+import axios from "../services/axiosConfig";
 import { useState, useEffect, useRef } from "react";
 import Card from "../Components/Card.jsx";
 import banner from "../Data/banner.PNG"; // Assuming this is the vertical banner
@@ -193,9 +193,7 @@ function LandPage() {
   useEffect(() => {
     const fetchLands = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/api/v1/lands/allLand"
-        );
+        const response = await axios.get('/lands/allLand');
         // Limit to a reasonable number for display
         const newData = response.data.data.slice(0, 10);
         setLands(newData);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
+import axios from '../services/axiosConfig';
 
 const AddLandPopup = ({ isOpen, onClose, onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,23 +45,39 @@ const AddLandPopup = ({ isOpen, onClose, onSubmit }) => {
         formData.append('water', values.water);
         formData.append('bed', values.bed);
         formData.append('wardrobe', values.wardrobe);
-        formData.append('description', values.description);
-        values.images.forEach((image) => {
-          formData.append('images', image);
-        });
+        formData.append('description', values.description || '');
+        formData.append('status', 'Còn trống');
+        formData.append('chdv', false);
+        
+        if (values.images && values.images.length > 0) {
+          values.images.forEach((image) => {
+            formData.append('images', image);
+          });
+        }
 
-        // Gửi trực tiếp tới API tạo nhà trọ
-        await axios.post('http://localhost:8080/api/v1/lands/createLand', formData, {
+        for (let pair of formData.entries()) {
+          console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        const response = await axios.post('/lands/createLand', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
         });
 
-        if (onSubmit) await onSubmit();
-        onClose();
+        if (response.data) {
+          if (onSubmit) await onSubmit();
+          onClose();
+        }
       } catch (error) {
         console.error('Error submitting form:', error);
-        throw error;
+        if (error.response) {
+          console.error('Server error:', error.response.data);
+          alert(error.response.data.message || 'Có lỗi xảy ra khi tạo nhà trọ');
+        } else {
+          alert('Có lỗi xảy ra khi tạo nhà trọ');
+        }
       } finally {
         setIsSubmitting(false);
       }

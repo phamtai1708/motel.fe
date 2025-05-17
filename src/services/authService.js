@@ -3,7 +3,7 @@ import axiosInstance from './axiosConfig';
 const getUserData = async (userId) => {
   const token = localStorage.getItem('token');
   if (!userId || !token) throw new Error('Chưa đăng nhập');
-  const response = await fetch(`http://localhost:8080/api/v1/users/${userId}`, {
+  const response = await fetch(`http://45.38.42.220:8080/api/v1/${userId}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',

@@ -32,8 +32,9 @@ function Home() {
     const fetchRooms = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/v1/rooms"
+          "http://45.38.42.220:8080/api/v1/rooms"
         );
+        console.log(response)
         const newData = response.data.data.slice(0, 8);
         setRooms(newData);
       } catch (error) {

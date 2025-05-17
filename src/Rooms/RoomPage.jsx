@@ -1,6 +1,6 @@
 import MainMenu from "../Components/MainMenu";
 import Footer from "../Components/Footer";
-import axios from "axios";
+import axios from '../services/axiosConfig';
 import { useState, useEffect, useRef } from "react";
 import Card from "../Components/Card.jsx";
 import banner from "../Data/banner.PNG"; // Assuming this is the vertical banner
@@ -117,9 +117,7 @@ function RoomPage() {
     useEffect(() => {
       const fetchRooms = async () => {
         try {
-          const response = await axios.get(
-            "http://localhost:8080/api/v1/rooms"
-          );
+          const response = await axios.get('/rooms');
           const newData = response.data.data.slice(0, 8);
           setRooms(newData);
         } catch (error) {

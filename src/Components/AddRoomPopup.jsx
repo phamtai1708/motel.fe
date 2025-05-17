@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios';
+import axios from '../services/axiosConfig';
 
 const AddRoomPopup = ({ isOpen, onClose, onSubmit, landId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +57,7 @@ const AddRoomPopup = ({ isOpen, onClose, onSubmit, landId }) => {
           formData.append('images', image);
         });
 
-        await axios.post('http://localhost:8080/api/v1/rooms/createRoom', formData, {
+        await axios.post('/rooms/createRoom', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
