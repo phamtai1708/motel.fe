@@ -31,9 +31,7 @@ function Home() {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await axios.get(
-          "http://45.38.42.220:8080/api/v1/rooms"
-        );
+        const response = await axios.get('https://motel-be.onrender.com/api/v1/rooms');
         console.log(response)
         const newData = response.data.data.slice(0, 8);
         setRooms(newData);
